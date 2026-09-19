@@ -1,0 +1,97 @@
+algorithm,input_type,n,avg_time_ms,comparisons,swaps
+Merge Sort,Random,100,0.003165,541,672
+Merge Sort,Random,500,0.014263,3862,4488
+Merge Sort,Random,1000,0.093846,8703,9976
+Merge Sort,Random,5000,0.744740,55226,61808
+Merge Sort,Random,10000,1.463840,120467,133616
+Merge Sort,Random,50000,5.112900,718073,784464
+Merge Sort,Nearly Sorted,100,0.002719,443,672
+Merge Sort,Nearly Sorted,500,0.012084,3307,4488
+Merge Sort,Nearly Sorted,1000,0.018616,7617,9976
+Merge Sort,Nearly Sorted,5000,0.355880,50754,61808
+Merge Sort,Nearly Sorted,10000,0.547960,111942,133616
+Merge Sort,Nearly Sorted,50000,1.596500,673053,784464
+Merge Sort,Reverse Sorted,100,0.002248,316,672
+Merge Sort,Reverse Sorted,500,0.007072,2216,4488
+Merge Sort,Reverse Sorted,1000,0.016162,4932,9976
+Merge Sort,Reverse Sorted,5000,0.191480,29804,61808
+Merge Sort,Reverse Sorted,10000,0.276800,64608,133616
+Merge Sort,Reverse Sorted,50000,1.533220,382512,784464
+Merge Sort,Many Duplicates,100,0.002656,536,672
+Merge Sort,Many Duplicates,500,0.015477,3762,4488
+Merge Sort,Many Duplicates,1000,0.032692,8497,9976
+Merge Sort,Many Duplicates,5000,0.387520,53653,61808
+Merge Sort,Many Duplicates,10000,0.592360,116781,133616
+Merge Sort,Many Duplicates,50000,2.600540,693928,784464
+Quick Sort,Random,100,0.000955,680,289
+Quick Sort,Random,500,0.009476,4806,2073
+Quick Sort,Random,1000,0.045478,10549,4753
+Quick Sort,Random,5000,0.318780,68614,31752
+Quick Sort,Random,10000,0.791660,147374,69615
+Quick Sort,Random,50000,4.750740,887541,420486
+Quick Sort,Nearly Sorted,100,0.000916,702,144
+Quick Sort,Nearly Sorted,500,0.013133,6361,1260
+Quick Sort,Nearly Sorted,1000,0.041148,14762,2937
+Quick Sort,Nearly Sorted,5000,0.327800,95593,21117
+Quick Sort,Nearly Sorted,10000,0.470840,205412,46025
+Quick Sort,Nearly Sorted,50000,2.277800,1280295,287425
+Quick Sort,Reverse Sorted,100,0.002001,842,336
+Quick Sort,Reverse Sorted,500,0.013514,6692,2648
+Quick Sort,Reverse Sorted,1000,0.029968,15655,6194
+Quick Sort,Reverse Sorted,5000,0.196060,105276,41688
+Quick Sort,Reverse Sorted,10000,0.404340,233137,92100
+Quick Sort,Reverse Sorted,50000,1.973400,1422199,557098
+Quick Sort,Many Duplicates,100,0.002162,1070,177
+Quick Sort,Many Duplicates,500,0.024666,15605,961
+Quick Sort,Many Duplicates,1000,0.090884,55857,1877
+Quick Sort,Many Duplicates,5000,1.335300,1282353,11157
+Quick Sort,Many Duplicates,10000,3.339980,5064153,23480
+Quick Sort,Many Duplicates,50000,124.962660,125309080,101714
+Heap Sort,Random,100,0.004348,1035,589
+Heap Sort,Random,500,0.032754,7435,4052
+Heap Sort,Random,1000,0.114258,16878,9098
+Heap Sort,Random,5000,0.979140,107632,57056
+Heap Sort,Random,10000,1.773500,235385,124225
+Heap Sort,Random,50000,9.180040,1409941,737616
+Heap Sort,Nearly Sorted,100,0.002730,1079,632
+Heap Sort,Nearly Sorted,500,0.026355,7712,4305
+Heap Sort,Nearly Sorted,1000,0.104808,17475,9640
+Heap Sort,Nearly Sorted,5000,0.509940,111683,60397
+Heap Sort,Nearly Sorted,10000,1.035400,243578,130845
+Heap Sort,Nearly Sorted,50000,6.341240,1451399,771254
+Heap Sort,Reverse Sorted,100,0.002011,944,516
+Heap Sort,Reverse Sorted,500,0.022911,7010,3676
+Heap Sort,Reverse Sorted,1000,0.073624,15965,8316
+Heap Sort,Reverse Sorted,5000,0.503060,103227,53436
+Heap Sort,Reverse Sorted,10000,1.214500,226682,116696
+Heap Sort,Reverse Sorted,50000,6.478220,1366047,698892
+Heap Sort,Many Duplicates,100,0.002630,1003,544
+Heap Sort,Many Duplicates,500,0.098094,7010,3698
+Heap Sort,Many Duplicates,1000,0.092978,15852,8311
+Heap Sort,Many Duplicates,5000,0.599640,99789,51754
+Heap Sort,Many Duplicates,10000,1.423580,217735,112634
+Heap Sort,Many Duplicates,50000,6.870380,1294406,665813
+Radix Sort,Random,100,0.018821,0,500
+Radix Sort,Random,500,0.106093,0,2500
+Radix Sort,Random,1000,0.190958,0,5000
+Radix Sort,Random,5000,1.148960,0,25000
+Radix Sort,Random,10000,1.968000,0,50000
+Radix Sort,Random,50000,10.753640,0,270000
+Radix Sort,Nearly Sorted,100,0.015602,0,300
+Radix Sort,Nearly Sorted,500,0.063018,0,1500
+Radix Sort,Nearly Sorted,1000,0.155092,0,4000
+Radix Sort,Nearly Sorted,5000,1.213920,0,20000
+Radix Sort,Nearly Sorted,10000,2.539300,0,50000
+Radix Sort,Nearly Sorted,50000,13.241500,0,250000
+Radix Sort,Reverse Sorted,100,0.011750,0,300
+Radix Sort,Reverse Sorted,500,0.060016,0,1500
+Radix Sort,Reverse Sorted,1000,0.148190,0,4000
+Radix Sort,Reverse Sorted,5000,0.755860,0,20000
+Radix Sort,Reverse Sorted,10000,2.263600,0,50000
+Radix Sort,Reverse Sorted,50000,10.405460,0,250000
+Radix Sort,Many Duplicates,100,0.007750,0,200
+Radix Sort,Many Duplicates,500,0.038078,0,1000
+Radix Sort,Many Duplicates,1000,0.075320,0,2000
+Radix Sort,Many Duplicates,5000,0.448280,0,10000
+Radix Sort,Many Duplicates,10000,0.854800,0,20000
+Radix Sort,Many Duplicates,50000,4.312680,0,100000

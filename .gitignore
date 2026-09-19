@@ -1,0 +1,36 @@
+# Compiled Executables
+*.exe
+*.out
+*.app
+
+# Object files & intermediate build artifacts
+*.o
+*.obj
+*.d
+*.gch
+
+# CMake build directories & cache
+build/
+bin/
+out/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# SFML Debug DLLs (keep lightweight release DLLs)
+*-d-2.dll
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosv
+*.sln
+*.vcxproj*
+
+# OS metadata
+Thumbs.db
+.DS_Store
+desktop.ini
