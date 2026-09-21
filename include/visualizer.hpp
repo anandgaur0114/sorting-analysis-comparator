@@ -83,6 +83,8 @@ private:
     // Benchmark plot data
     std::vector<BenchmarkResult> plot_results_;
     InputType plot_input_type_ = InputType::RANDOM;
+    bool plot_log_scale_ = true;
+    sf::Vector2f mouse_pos_{0.0f, 0.0f};
 
     // UI Buttons
     std::vector<UIButton> buttons_;

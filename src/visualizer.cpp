@@ -51,9 +51,9 @@ void SortingVisualizer::setup_buttons() {
     buttons_.push_back({"mode_plot", "Benchmark Plot", sf::FloatRect(614.0f, 12.0f, 130.0f, 32.0f), false, false});
 
     // Row 1: Primary Action Controls (Custom Insert Array, Randomize, Pause)
-    buttons_.push_back({"action_custom", "✍ Insert Array", sf::FloatRect(758.0f, 12.0f, 135.0f, 32.0f), false, false});
-    buttons_.push_back({"action_random", "🎲 Randomize", sf::FloatRect(900.0f, 12.0f, 115.0f, 32.0f), false, false});
-    buttons_.push_back({"action_pause", "❚❚ Pause", sf::FloatRect(1022.0f, 12.0f, 95.0f, 32.0f), false, false});
+    buttons_.push_back({"action_custom", "[+] Insert Array", sf::FloatRect(758.0f, 12.0f, 135.0f, 32.0f), false, false});
+    buttons_.push_back({"action_random", "Randomize", sf::FloatRect(900.0f, 12.0f, 115.0f, 32.0f), false, false});
+    buttons_.push_back({"action_pause", "Pause", sf::FloatRect(1022.0f, 12.0f, 95.0f, 32.0f), false, false});
 
     // Row 2: Secondary Toolbar (y = 52, h = 28)
     // Algorithm selection
@@ -68,13 +68,16 @@ void SortingVisualizer::setup_buttons() {
     buttons_.push_back({"dist_rev", "Reverse", sf::FloatRect(625.0f, 52.0f, 75.0f, 28.0f), false, false});
     buttons_.push_back({"dist_dup", "Duplicates", sf::FloatRect(705.0f, 52.0f, 85.0f, 28.0f), false, false});
 
-    // Scale N buttons
+    // Scale N buttons (for Single/Race modes)
     buttons_.push_back({"size_dec", "-", sf::FloatRect(865.0f, 52.0f, 28.0f, 28.0f), false, false});
     buttons_.push_back({"size_inc", "+", sf::FloatRect(955.0f, 52.0f, 28.0f, 28.0f), false, false});
 
-    // Speed buttons
+    // Speed buttons (for Single/Race modes)
     buttons_.push_back({"speed_dec", "-", sf::FloatRect(1075.0f, 52.0f, 28.0f, 28.0f), false, false});
     buttons_.push_back({"speed_inc", "+", sf::FloatRect(1185.0f, 52.0f, 28.0f, 28.0f), false, false});
+
+    // Benchmark Plot Scale Toggle Button (visible in RESULTS_PLOT mode)
+    buttons_.push_back({"plot_scale", "Scale: Log-Log", sf::FloatRect(895.0f, 52.0f, 150.0f, 28.0f), false, false});
 }
 
 void SortingVisualizer::setup_modal_buttons() {
@@ -87,9 +90,9 @@ void SortingVisualizer::setup_modal_buttons() {
     modal_buttons_.push_back({"modal_ex4", "Ex 4: 10, 50, 20, 40, 30", sf::FloatRect(605.0f, 380.0f, 200.0f, 30.0f), false, false});
 
     // Action buttons
-    modal_buttons_.push_back({"modal_sort", "✔ Trace & Sort Array", sf::FloatRect(370.0f, 455.0f, 200.0f, 42.0f), false, false});
-    modal_buttons_.push_back({"modal_random", "🎲 Random 16", sf::FloatRect(585.0f, 455.0f, 140.0f, 42.0f), false, false});
-    modal_buttons_.push_back({"modal_cancel", "✖ Cancel", sf::FloatRect(740.0f, 455.0f, 125.0f, 42.0f), false, false});
+    modal_buttons_.push_back({"modal_sort", "[OK] Trace Array", sf::FloatRect(370.0f, 455.0f, 200.0f, 42.0f), false, false});
+    modal_buttons_.push_back({"modal_random", "Random 16", sf::FloatRect(585.0f, 455.0f, 140.0f, 42.0f), false, false});
+    modal_buttons_.push_back({"modal_cancel", "Cancel", sf::FloatRect(740.0f, 455.0f, 125.0f, 42.0f), false, false});
 }
 
 void SortingVisualizer::update_button_states() {
@@ -99,8 +102,12 @@ void SortingVisualizer::update_button_states() {
         else if (btn.id == "mode_plot") btn.is_active = (current_mode_ == VisualizerMode::RESULTS_PLOT);
         else if (btn.id == "action_custom") btn.is_active = input_modal_open_;
         else if (btn.id == "action_pause") {
-            btn.label = (is_paused_ ? "▶ Resume" : "❚❚ Pause");
+            btn.label = (is_paused_ ? "Resume" : "Pause");
             btn.is_active = is_paused_;
+        }
+        else if (btn.id == "plot_scale") {
+            btn.label = (plot_log_scale_ ? "Scale: Log-Log" : "Scale: Linear");
+            btn.is_active = plot_log_scale_;
         }
         else if (btn.id == "algo_merge") btn.is_active = (current_algo_ == "Merge Sort");
         else if (btn.id == "algo_quick") btn.is_active = (current_algo_ == "Quick Sort");
@@ -283,6 +290,8 @@ void SortingVisualizer::step_runner(SortRunnerState& runner, int steps_to_advanc
 }
 
 void SortingVisualizer::handle_mouse_move(float x, float y) {
+    mouse_pos_ = sf::Vector2f(x, y);
+
     if (input_modal_open_) {
         for (auto& btn : modal_buttons_) {
             btn.is_hovered = btn.bounds.contains(x, y);
@@ -291,6 +300,15 @@ void SortingVisualizer::handle_mouse_move(float x, float y) {
     }
 
     for (auto& btn : buttons_) {
+        if (btn.id == "plot_scale" && current_mode_ != VisualizerMode::RESULTS_PLOT) {
+            btn.is_hovered = false;
+            continue;
+        }
+        if ((btn.id == "size_dec" || btn.id == "size_inc" || btn.id == "speed_dec" || btn.id == "speed_inc") &&
+            current_mode_ == VisualizerMode::RESULTS_PLOT) {
+            btn.is_hovered = false;
+            continue;
+        }
         btn.is_hovered = btn.bounds.contains(x, y);
     }
 }
@@ -321,6 +339,10 @@ void SortingVisualizer::handle_mouse_click(float x, float y) {
     }
 
     for (const auto& btn : buttons_) {
+        if (btn.id == "plot_scale" && current_mode_ != VisualizerMode::RESULTS_PLOT) continue;
+        if ((btn.id == "size_dec" || btn.id == "size_inc" || btn.id == "speed_dec" || btn.id == "speed_inc") &&
+            current_mode_ == VisualizerMode::RESULTS_PLOT) continue;
+
         if (btn.bounds.contains(x, y)) {
             // View Navigation
             if (btn.id == "mode_single") current_mode_ = VisualizerMode::SINGLE_SORT;
@@ -342,6 +364,11 @@ void SortingVisualizer::handle_mouse_click(float x, float y) {
 
             // Execution Controls
             else if (btn.id == "action_pause") is_paused_ = !is_paused_;
+
+            // Benchmark Plot Scale Toggle (Log-Log vs Linear)
+            else if (btn.id == "plot_scale") {
+                plot_log_scale_ = !plot_log_scale_;
+            }
 
             // Algorithm Selection
             else if (btn.id == "algo_merge") {
@@ -688,22 +715,36 @@ void SortingVisualizer::render_results_plot() {
 
     sf::RectangleShape bg(sf::Vector2f(plot_area.width, plot_area.height));
     bg.setPosition(plot_area.left, plot_area.top);
-    bg.setFillColor(sf::Color(16, 20, 28));
+    bg.setFillColor(sf::Color(14, 18, 26));
     bg.setOutlineThickness(1.0f);
-    bg.setOutlineColor(sf::Color(50, 62, 80));
+    bg.setOutlineColor(sf::Color(45, 58, 76));
     window_.draw(bg);
 
     std::string type_str = input_type_to_string(plot_input_type_);
 
     if (font_loaded_) {
+        // Plot Title
         sf::Text plot_title;
         plot_title.setFont(font_);
-        plot_title.setCharacterSize(18);
+        plot_title.setCharacterSize(17);
         plot_title.setFillColor(sf::Color::White);
         plot_title.setStyle(sf::Text::Bold);
         plot_title.setString("Execution Time vs. Input Scale (N)  -  Dataset: " + type_str);
-        plot_title.setPosition(plot_area.left + 25.0f, plot_area.top + 15.0f);
+        plot_title.setPosition(plot_area.left + 25.0f, plot_area.top + 12.0f);
         window_.draw(plot_title);
+
+        // Subtitle / scale guide
+        sf::Text sub_title;
+        sub_title.setFont(font_);
+        sub_title.setCharacterSize(12);
+        sub_title.setFillColor(sf::Color(140, 160, 185));
+        if (plot_log_scale_) {
+            sub_title.setString("Log-Log Mode  |  Slope = Big-O exponent (Radix O(n)~1.0,  N*log(n)~1.1,  O(n^2)~2.0)  |  Hover dots for details");
+        } else {
+            sub_title.setString("Linear-Y Mode  |  Wall-Clock Milliseconds (ms) vs Logarithmic Input Scale N  |  Hover dots for details");
+        }
+        sub_title.setPosition(plot_area.left + 25.0f, plot_area.top + 34.0f);
+        window_.draw(sub_title);
     }
 
     std::vector<int> sizes = {100, 500, 1000, 5000, 10000, 50000};
@@ -715,120 +756,375 @@ void SortingVisualizer::render_results_plot() {
         sf::Color(46, 204, 113)   // Green
     };
 
-    double max_time = 0.1;
+    // Find max time in current dataset
+    double max_time = 0.001;
     for (const auto& r : plot_results_) {
         if (r.input_type == type_str && r.avg_time_ms > max_time) {
             max_time = r.avg_time_ms;
         }
     }
-    max_time *= 1.15;
 
-    float origin_x = plot_area.left + 75.0f;
-    float origin_y = plot_area.top + plot_area.height - 50.0f;
-    float graph_w = plot_area.width - 110.0f;
-    float graph_h = plot_area.height - 100.0f;
+    float origin_x = plot_area.left + 85.0f;
+    float origin_y = plot_area.top + plot_area.height - 48.0f;
+    float graph_w = plot_area.width - 275.0f; // Leaves room for legend
+    float graph_h = plot_area.height - 110.0f;
 
-    // Grid lines & X tick labels
+    // X-Axis Log Mapping (100 to 50,000)
+    double log_x_min = std::log10(100.0);
+    double log_x_max = std::log10(50000.0);
+
+    auto get_x = [&](int n) -> float {
+        double val = std::log10(static_cast<double>(std::max(100, n)));
+        double norm = (val - log_x_min) / (log_x_max - log_x_min);
+        return origin_x + static_cast<float>(norm) * graph_w;
+    };
+
+    // Y-Axis Mapping
+    double log_y_min = -3.0; // 0.001 ms (1 microsecond)
+    double log_y_max = (max_time > 15.0 ? 2.3 : 1.3); // 20 ms or 200 ms
+    double lin_y_max = std::max(0.05, max_time * 1.15);
+
+    auto get_y = [&](double time_ms) -> float {
+        if (plot_log_scale_) {
+            double safe_t = std::max(time_ms, 0.0005);
+            double val = std::log10(safe_t);
+            double norm = (val - log_y_min) / (log_y_max - log_y_min);
+            norm = std::max(0.0, std::min(1.0, norm));
+            return origin_y - static_cast<float>(norm) * graph_h;
+        } else {
+            double norm = time_ms / lin_y_max;
+            norm = std::max(0.0, std::min(1.0, norm));
+            return origin_y - static_cast<float>(norm) * graph_h;
+        }
+    };
+
+    // Draw Y Grid lines and tick labels
+    if (plot_log_scale_) {
+        // Log decades: 0.001, 0.01, 0.1, 1.0, 10.0, 100.0
+        std::vector<std::pair<double, std::string>> y_ticks = {
+            {0.001, "0.001 ms"},
+            {0.01,  "0.01 ms"},
+            {0.1,   "0.1 ms"},
+            {1.0,   "1.0 ms"},
+            {10.0,  "10.0 ms"}
+        };
+        if (log_y_max > 2.0) {
+            y_ticks.push_back({100.0, "100 ms"});
+        }
+
+        // Faint sub-grid lines for 2x, 5x
+        for (double decade : {0.001, 0.01, 0.1, 1.0, 10.0}) {
+            for (double mult : {2.0, 5.0}) {
+                double sub_val = decade * mult;
+                if (sub_val <= std::pow(10.0, log_y_max)) {
+                    float y = get_y(sub_val);
+                    sf::Vertex sub_line[] = {
+                        sf::Vertex(sf::Vector2f(origin_x, y), sf::Color(26, 34, 46)),
+                        sf::Vertex(sf::Vector2f(origin_x + graph_w, y), sf::Color(26, 34, 46))
+                    };
+                    window_.draw(sub_line, 2, sf::Lines);
+                }
+            }
+        }
+
+        for (const auto& yt : y_ticks) {
+            float y = get_y(yt.first);
+            sf::Vertex grid_line[] = {
+                sf::Vertex(sf::Vector2f(origin_x, y), sf::Color(42, 54, 72)),
+                sf::Vertex(sf::Vector2f(origin_x + graph_w, y), sf::Color(42, 54, 72))
+            };
+            window_.draw(grid_line, 2, sf::Lines);
+
+            if (font_loaded_) {
+                sf::Text y_txt;
+                y_txt.setFont(font_);
+                y_txt.setCharacterSize(11);
+                y_txt.setFillColor(sf::Color(160, 175, 195));
+                y_txt.setString(yt.second);
+                y_txt.setPosition(origin_x - 72.0f, y - 7.0f);
+                window_.draw(y_txt);
+            }
+        }
+    } else {
+        int num_y_ticks = 5;
+        for (int i = 0; i <= num_y_ticks; ++i) {
+            double val = (static_cast<double>(i) / num_y_ticks) * lin_y_max;
+            float y = origin_y - (static_cast<float>(i) / num_y_ticks) * graph_h;
+
+            sf::Vertex grid_line[] = {
+                sf::Vertex(sf::Vector2f(origin_x, y), sf::Color(42, 54, 72)),
+                sf::Vertex(sf::Vector2f(origin_x + graph_w, y), sf::Color(42, 54, 72))
+            };
+            window_.draw(grid_line, 2, sf::Lines);
+
+            if (font_loaded_) {
+                sf::Text y_txt;
+                y_txt.setFont(font_);
+                y_txt.setCharacterSize(11);
+                y_txt.setFillColor(sf::Color(160, 175, 195));
+                std::stringstream ss;
+                ss << std::fixed << std::setprecision(1) << val << " ms";
+                y_txt.setString(ss.str());
+                y_txt.setPosition(origin_x - 68.0f, y - 7.0f);
+                window_.draw(y_txt);
+            }
+        }
+    }
+
+    // X Grid lines & tick labels
+    std::vector<std::string> x_labels = {"100", "500", "1,000", "5,000", "10,000", "50,000"};
     for (size_t i = 0; i < sizes.size(); ++i) {
-        float x = origin_x + (static_cast<float>(i) / (sizes.size() - 1)) * (graph_w - 50.0f);
+        float x = get_x(sizes[i]);
 
         sf::Vertex grid_line[] = {
-            sf::Vertex(sf::Vector2f(x, origin_y), sf::Color(35, 45, 60)),
-            sf::Vertex(sf::Vector2f(x, origin_y - graph_h), sf::Color(35, 45, 60))
+            sf::Vertex(sf::Vector2f(x, origin_y), sf::Color(42, 54, 72)),
+            sf::Vertex(sf::Vector2f(x, origin_y - graph_h), sf::Color(42, 54, 72))
         };
         window_.draw(grid_line, 2, sf::Lines);
 
         if (font_loaded_) {
             sf::Text tick_txt;
             tick_txt.setFont(font_);
-            tick_txt.setCharacterSize(13);
-            tick_txt.setFillColor(sf::Color(160, 175, 195));
-            tick_txt.setString(std::to_string(sizes[i]));
-            tick_txt.setPosition(x - 15.0f, origin_y + 10.0f);
+            tick_txt.setCharacterSize(12);
+            tick_txt.setFillColor(sf::Color(170, 190, 215));
+            tick_txt.setString(x_labels[i]);
+            tick_txt.setPosition(x - 18.0f, origin_y + 8.0f);
             window_.draw(tick_txt);
         }
     }
 
-    // Y ticks
-    int num_y_ticks = 5;
-    for (int i = 0; i <= num_y_ticks; ++i) {
-        float y = origin_y - (static_cast<float>(i) / num_y_ticks) * graph_h;
-        double val = (static_cast<double>(i) / num_y_ticks) * max_time;
-
-        sf::Vertex grid_line[] = {
-            sf::Vertex(sf::Vector2f(origin_x, y), sf::Color(35, 45, 60)),
-            sf::Vertex(sf::Vector2f(origin_x + graph_w - 50.0f, y), sf::Color(35, 45, 60))
-        };
-        window_.draw(grid_line, 2, sf::Lines);
-
-        if (font_loaded_) {
-            sf::Text y_txt;
-            y_txt.setFont(font_);
-            y_txt.setCharacterSize(12);
-            y_txt.setFillColor(sf::Color(160, 175, 195));
-            std::stringstream ss;
-            ss << std::fixed << std::setprecision(1) << val << " ms";
-            y_txt.setString(ss.str());
-            y_txt.setPosition(origin_x - 65.0f, y - 8.0f);
-            window_.draw(y_txt);
-        }
+    // X-Axis Title
+    if (font_loaded_) {
+        sf::Text x_axis_title;
+        x_axis_title.setFont(font_);
+        x_axis_title.setCharacterSize(12);
+        x_axis_title.setFillColor(sf::Color(130, 150, 175));
+        x_axis_title.setString("Input Array Size (N) [Logarithmic Scale]");
+        x_axis_title.setPosition(origin_x + graph_w / 2.0f - 110.0f, origin_y + 26.0f);
+        window_.draw(x_axis_title);
     }
 
-    // Lines & Nodes
+    // Data Point storage for lines and interactive tooltip
+    struct PlotPointInfo {
+        sf::Vector2f pos;
+        std::string algo;
+        sf::Color color;
+        int n;
+        double time_ms;
+        long long comparisons;
+        long long swaps;
+    };
+    std::vector<PlotPointInfo> all_points;
+
     for (size_t a = 0; a < algos.size(); ++a) {
-        std::vector<sf::Vector2f> points;
+        std::vector<PlotPointInfo> curve_points;
 
         for (size_t i = 0; i < sizes.size(); ++i) {
             int n_target = sizes[i];
             double time_ms = 0.0;
+            long long comparisons = 0;
+            long long swaps = 0;
+
             for (const auto& r : plot_results_) {
                 if (r.algorithm == algos[a] && r.input_type == type_str && r.n == n_target) {
                     time_ms = r.avg_time_ms;
+                    comparisons = r.avg_comparisons;
+                    swaps = r.avg_swaps;
                     break;
                 }
             }
 
-            float x = origin_x + (static_cast<float>(i) / (sizes.size() - 1)) * (graph_w - 50.0f);
-            float y = origin_y - static_cast<float>(time_ms / max_time) * graph_h;
-            points.push_back(sf::Vector2f(x, y));
+            float x = get_x(n_target);
+            float y = get_y(time_ms);
+
+            PlotPointInfo p{sf::Vector2f(x, y), algos[a], algo_colors[a], n_target, time_ms, comparisons, swaps};
+            curve_points.push_back(p);
+            all_points.push_back(p);
         }
 
-        for (size_t i = 1; i < points.size(); ++i) {
-            sf::Vertex line[] = {
-                sf::Vertex(points[i - 1], algo_colors[a]),
-                sf::Vertex(points[i], algo_colors[a])
+        // Draw connecting lines with double-pass for visual crispness
+        for (size_t i = 1; i < curve_points.size(); ++i) {
+            sf::Vertex line1[] = {
+                sf::Vertex(curve_points[i - 1].pos, algo_colors[a]),
+                sf::Vertex(curve_points[i].pos, algo_colors[a])
             };
-            window_.draw(line, 2, sf::Lines);
+            window_.draw(line1, 2, sf::Lines);
+
+            sf::Vertex line2[] = {
+                sf::Vertex(sf::Vector2f(curve_points[i - 1].pos.x, curve_points[i - 1].pos.y + 1.0f), algo_colors[a]),
+                sf::Vertex(sf::Vector2f(curve_points[i].pos.x, curve_points[i].pos.y + 1.0f), algo_colors[a])
+            };
+            window_.draw(line2, 2, sf::Lines);
         }
 
-        for (const auto& pt : points) {
+        // Draw dots
+        for (const auto& pt : curve_points) {
             sf::CircleShape dot(4.5f);
             dot.setOrigin(4.5f, 4.5f);
-            dot.setPosition(pt);
+            dot.setPosition(pt.pos);
             dot.setFillColor(algo_colors[a]);
+            dot.setOutlineThickness(1.0f);
+            dot.setOutlineColor(sf::Color(10, 14, 20));
             window_.draw(dot);
         }
     }
 
-    // Legend
-    float legend_x = plot_area.left + plot_area.width - 230.0f;
-    float legend_y = plot_area.top + 20.0f;
+    // Interactive Hover Tooltip Detection
+    const PlotPointInfo* hovered = nullptr;
+    float best_dist = 18.0f;
+    for (const auto& pt : all_points) {
+        float dx = pt.pos.x - mouse_pos_.x;
+        float dy = pt.pos.y - mouse_pos_.y;
+        float d = std::sqrt(dx * dx + dy * dy);
+        if (d < best_dist) {
+            best_dist = d;
+            hovered = &pt;
+        }
+    }
+
+    // Legend on the Right
+    float legend_x = origin_x + graph_w + 30.0f;
+    float legend_y = plot_area.top + 30.0f;
+
+    // Legend Box Frame
+    sf::RectangleShape leg_box(sf::Vector2f(170.0f, 210.0f));
+    leg_box.setPosition(legend_x - 10.0f, legend_y - 10.0f);
+    leg_box.setFillColor(sf::Color(20, 26, 36));
+    leg_box.setOutlineThickness(1.0f);
+    leg_box.setOutlineColor(sf::Color(55, 68, 88));
+    window_.draw(leg_box);
+
+    if (font_loaded_) {
+        sf::Text leg_title;
+        leg_title.setFont(font_);
+        leg_title.setCharacterSize(13);
+        leg_title.setStyle(sf::Text::Bold);
+        leg_title.setFillColor(sf::Color(180, 200, 225));
+        leg_title.setString("ALGORITHMS");
+        leg_title.setPosition(legend_x, legend_y - 2.0f);
+        window_.draw(leg_title);
+    }
 
     for (size_t a = 0; a < algos.size(); ++a) {
-        sf::RectangleShape box(sf::Vector2f(14.0f, 14.0f));
-        box.setPosition(legend_x, legend_y + a * 24.0f);
+        float row_y = legend_y + 24.0f + a * 25.0f;
+
+        sf::RectangleShape box(sf::Vector2f(13.0f, 13.0f));
+        box.setPosition(legend_x, row_y + 2.0f);
         box.setFillColor(algo_colors[a]);
         window_.draw(box);
 
         if (font_loaded_) {
             sf::Text leg_txt;
             leg_txt.setFont(font_);
-            leg_txt.setCharacterSize(14);
+            leg_txt.setCharacterSize(13);
             leg_txt.setFillColor(sf::Color::White);
             leg_txt.setString(algos[a]);
-            leg_txt.setPosition(legend_x + 24.0f, legend_y + a * 24.0f - 2.0f);
+            leg_txt.setPosition(legend_x + 20.0f, row_y);
             window_.draw(leg_txt);
         }
+    }
+
+    // Big-O Theoretical reference notes in legend
+    if (font_loaded_) {
+        float note_y = legend_y + 130.0f;
+        sf::Text note_head;
+        note_head.setFont(font_);
+        note_head.setCharacterSize(11);
+        note_head.setStyle(sf::Text::Bold);
+        note_head.setFillColor(sf::Color(140, 160, 185));
+        note_head.setString("COMPLEXITY (Avg):");
+        note_head.setPosition(legend_x, note_y);
+        window_.draw(note_head);
+
+        std::vector<std::string> big_o_notes = {
+            "Merge: O(n log n)",
+            "Quick: O(n log n)",
+            "Heap:  O(n log n)",
+            "Radix: O(n)"
+        };
+        for (size_t i = 0; i < big_o_notes.size(); ++i) {
+            sf::Text note_txt;
+            note_txt.setFont(font_);
+            note_txt.setCharacterSize(10);
+            note_txt.setFillColor(sf::Color(150, 165, 185));
+            note_txt.setString(big_o_notes[i]);
+            note_txt.setPosition(legend_x, note_y + 16.0f + i * 14.0f);
+            window_.draw(note_txt);
+        }
+    }
+
+    // Draw Hover Tooltip if hovering a dot
+    if (hovered && font_loaded_) {
+        // Highlight circle
+        sf::CircleShape glow(8.5f);
+        glow.setOrigin(8.5f, 8.5f);
+        glow.setPosition(hovered->pos);
+        glow.setFillColor(sf::Color::Transparent);
+        glow.setOutlineThickness(2.5f);
+        glow.setOutlineColor(sf::Color::White);
+        window_.draw(glow);
+
+        // Tooltip card
+        float tt_w = 215.0f;
+        float tt_h = 84.0f;
+        float tt_x = hovered->pos.x + 14.0f;
+        float tt_y = hovered->pos.y - tt_h / 2.0f;
+
+        // Boundary adjustments
+        if (tt_x + tt_w > plot_area.left + plot_area.width - 10.0f) {
+            tt_x = hovered->pos.x - tt_w - 14.0f;
+        }
+        if (tt_y < plot_area.top + 10.0f) tt_y = plot_area.top + 10.0f;
+        if (tt_y + tt_h > origin_y + 35.0f) tt_y = origin_y + 35.0f - tt_h;
+
+        sf::RectangleShape tt_bg(sf::Vector2f(tt_w, tt_h));
+        tt_bg.setPosition(tt_x, tt_y);
+        tt_bg.setFillColor(sf::Color(10, 15, 22, 245));
+        tt_bg.setOutlineThickness(1.5f);
+        tt_bg.setOutlineColor(hovered->color);
+        window_.draw(tt_bg);
+
+        // Line 1: Algo name
+        sf::Text t_algo;
+        t_algo.setFont(font_);
+        t_algo.setCharacterSize(13);
+        t_algo.setStyle(sf::Text::Bold);
+        t_algo.setFillColor(hovered->color);
+        t_algo.setString(hovered->algo);
+        t_algo.setPosition(tt_x + 10.0f, tt_y + 6.0f);
+        window_.draw(t_algo);
+
+        // Line 2: Scale N
+        sf::Text t_n;
+        t_n.setFont(font_);
+        t_n.setCharacterSize(12);
+        t_n.setFillColor(sf::Color::White);
+        t_n.setString("Scale N: " + std::to_string(hovered->n));
+        t_n.setPosition(tt_x + 10.0f, tt_y + 24.0f);
+        window_.draw(t_n);
+
+        // Line 3: Time
+        std::stringstream ss_t;
+        ss_t << "Time: " << std::fixed << std::setprecision(3) << hovered->time_ms << " ms ("
+             << std::setprecision(1) << (hovered->time_ms * 1000.0) << " us)";
+        sf::Text t_time;
+        t_time.setFont(font_);
+        t_time.setCharacterSize(11);
+        t_time.setFillColor(sf::Color(0, 220, 255));
+        t_time.setString(ss_t.str());
+        t_time.setPosition(tt_x + 10.0f, tt_y + 42.0f);
+        window_.draw(t_time);
+
+        // Line 4: Comps & Swaps
+        std::stringstream ss_cs;
+        ss_cs << "Comps: " << hovered->comparisons << "  |  Swaps: " << hovered->swaps;
+        sf::Text t_cs;
+        t_cs.setFont(font_);
+        t_cs.setCharacterSize(11);
+        t_cs.setFillColor(sf::Color(170, 185, 205));
+        t_cs.setString(ss_cs.str());
+        t_cs.setPosition(tt_x + 10.0f, tt_y + 60.0f);
+        window_.draw(t_cs);
     }
 }
 
@@ -870,48 +1166,66 @@ void SortingVisualizer::render_toolbar() {
         lbl_dist.setPosition(395.0f, 57.0f);
         window_.draw(lbl_dist);
 
-        // Size Display
-        sf::Text lbl_size;
-        lbl_size.setFont(font_);
-        lbl_size.setCharacterSize(13);
-        lbl_size.setFillColor(sf::Color(140, 155, 175));
-        lbl_size.setString("Size:");
-        lbl_size.setPosition(825.0f, 57.0f);
-        window_.draw(lbl_size);
+        if (current_mode_ != VisualizerMode::RESULTS_PLOT) {
+            // Size Display
+            sf::Text lbl_size;
+            lbl_size.setFont(font_);
+            lbl_size.setCharacterSize(13);
+            lbl_size.setFillColor(sf::Color(140, 155, 175));
+            lbl_size.setString("Size:");
+            lbl_size.setPosition(825.0f, 57.0f);
+            window_.draw(lbl_size);
 
-        sf::Text val_size;
-        val_size.setFont(font_);
-        val_size.setCharacterSize(13);
-        val_size.setStyle(sf::Text::Bold);
-        val_size.setFillColor(sf::Color::White);
-        val_size.setString(std::to_string(array_size_));
-        val_size.setPosition(905.0f, 57.0f);
-        window_.draw(val_size);
+            sf::Text val_size;
+            val_size.setFont(font_);
+            val_size.setCharacterSize(13);
+            val_size.setStyle(sf::Text::Bold);
+            val_size.setFillColor(sf::Color::White);
+            val_size.setString(std::to_string(array_size_));
+            val_size.setPosition(905.0f, 57.0f);
+            window_.draw(val_size);
 
-        // Speed Display
-        sf::Text lbl_speed;
-        lbl_speed.setFont(font_);
-        lbl_speed.setCharacterSize(13);
-        lbl_speed.setFillColor(sf::Color(140, 155, 175));
-        lbl_speed.setString("Speed:");
-        lbl_speed.setPosition(1025.0f, 57.0f);
-        window_.draw(lbl_speed);
+            // Speed Display
+            sf::Text lbl_speed;
+            lbl_speed.setFont(font_);
+            lbl_speed.setCharacterSize(13);
+            lbl_speed.setFillColor(sf::Color(140, 155, 175));
+            lbl_speed.setString("Speed:");
+            lbl_speed.setPosition(1025.0f, 57.0f);
+            window_.draw(lbl_speed);
 
-        sf::Text val_speed;
-        val_speed.setFont(font_);
-        val_speed.setCharacterSize(13);
-        val_speed.setStyle(sf::Text::Bold);
-        val_speed.setFillColor(sf::Color::White);
-        std::stringstream ss_spd;
-        ss_spd << speed_level_ << "/7";
-        val_speed.setString(ss_spd.str());
-        val_speed.setPosition(1115.0f, 57.0f);
-        window_.draw(val_speed);
+            sf::Text val_speed;
+            val_speed.setFont(font_);
+            val_speed.setCharacterSize(13);
+            val_speed.setStyle(sf::Text::Bold);
+            val_speed.setFillColor(sf::Color::White);
+            std::stringstream ss_spd;
+            ss_spd << speed_level_ << "/7";
+            val_speed.setString(ss_spd.str());
+            val_speed.setPosition(1115.0f, 57.0f);
+            window_.draw(val_speed);
+        } else {
+            // Scale Display for Benchmark Plot Mode
+            sf::Text lbl_scale;
+            lbl_scale.setFont(font_);
+            lbl_scale.setCharacterSize(13);
+            lbl_scale.setFillColor(sf::Color(140, 155, 175));
+            lbl_scale.setString("Y-Scale:");
+            lbl_scale.setPosition(825.0f, 57.0f);
+            window_.draw(lbl_scale);
+        }
     }
 
     for (const auto& btn : buttons_) {
+        // Only render plot_scale in RESULTS_PLOT mode
+        if (btn.id == "plot_scale" && current_mode_ != VisualizerMode::RESULTS_PLOT) continue;
+        // In RESULTS_PLOT mode, skip size and speed buttons
+        if ((btn.id == "size_dec" || btn.id == "size_inc" || btn.id == "speed_dec" || btn.id == "speed_inc") &&
+            current_mode_ == VisualizerMode::RESULTS_PLOT) continue;
+
         sf::Color accent = sf::Color(0, 145, 215);
         if (btn.id == "action_custom") accent = sf::Color(46, 204, 113); // Highlight Insert Array in green
+        else if (btn.id == "plot_scale") accent = sf::Color(155, 89, 182); // Distinct Purple for Scale Toggle
         render_button(btn, accent);
     }
 }
@@ -946,7 +1260,7 @@ void SortingVisualizer::render_bottom_hud() {
            << "  |  Finished: " << finished_count_ << "/4"
            << "  |  State: " << (finished_count_ == 4 ? "[ALL FINISHED]" : (is_paused_ ? "[PAUSED]" : "[RACING...]"));
     } else if (current_mode_ == VisualizerMode::RESULTS_PLOT) {
-        ss << "Benchmark Curves View  |  Click any Data button above to switch dataset";
+        ss << "Benchmark Curves View  |  Click Data buttons to switch dataset  |  Toggle [Scale: Log-Log / Linear]  |  Hover dots for exact stats";
     }
 
     status.setString(ss.str());
